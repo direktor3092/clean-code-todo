@@ -60,7 +60,7 @@ const addTask = function () {
 
   //Append listItem to incompleteTaskHolder
   incompleteTaskHolder.appendChild(listItem);
-  bindTaskEvents(listItem, taskCompleted);
+  bindTaskEvents(listItem);
 
   taskInput.value = '';
 };
@@ -97,21 +97,14 @@ const deleteTask = function () {
   ul.removeChild(listItem);
 };
 
-//Mark task completed
-const taskCompleted = function () {
-  //Append the task list item to the #completed-tasks
+const toggleTask = function () {
   const listItem = this.parentNode;
-  completedTasksHolder.appendChild(listItem);
-  bindTaskEvents(listItem, taskIncomplete);
-};
+  const isCompleted = this.checked;
+  const targetHolder = isCompleted
+    ? completedTasksHolder
+    : incompleteTaskHolder;
 
-const taskIncomplete = function () {
-  //Mark task as incomplete.
-  //When the checkbox is unchecked
-  //Append the task list item to the #incompleteTasks.
-  const listItem = this.parentNode;
-  incompleteTaskHolder.appendChild(listItem);
-  bindTaskEvents(listItem, taskCompleted);
+  targetHolder.appendChild(listItem);
 };
 
 //The glue to hold it all together.
@@ -119,32 +112,22 @@ const taskIncomplete = function () {
 //Set the click handler to the addTask function.
 addButton.addEventListener('click', addTask);
 
-const bindTaskEvents = function (taskListItem, checkBoxEventHandler) {
-  //select ListItems children
+const bindTaskEvents = function (taskListItem) {
   const checkBox = taskListItem.querySelector('input[type=checkbox]');
   const editButton = taskListItem.querySelector('button.edit');
   const deleteButton = taskListItem.querySelector('button.delete');
 
-  //Bind editTask to edit button.
-  editButton.onclick = editTask;
-  //Bind deleteTask to delete button.
-  deleteButton.onclick = deleteTask;
-  //Bind taskCompleted to checkBoxEventHandler.
-  checkBox.onchange = checkBoxEventHandler;
+  editButton.addEventListener('click', editTask);
+  deleteButton.addEventListener('click', deleteTask);
+  checkBox.addEventListener('change', toggleTask);
 };
 
-//cycle over incompleteTaskHolder ul list items
-//for each list item
-for (let i = 0; i < incompleteTaskHolder.children.length; i++) {
-  //bind events to list items chldren(tasksCompleted)
-  bindTaskEvents(incompleteTaskHolder.children[i], taskCompleted);
-}
+const bindEventsToAllTasks = (container) => {
+  Array.from(container.children).forEach((task) => bindTaskEvents(task));
+};
 
-//cycle over completedTasksHolder ul list items
-for (let i = 0; i < completedTasksHolder.children.length; i++) {
-  //bind events to list items chldren(tasksIncompleted)
-  bindTaskEvents(completedTasksHolder.children[i], taskIncomplete);
-}
+bindEventsToAllTasks(incompleteTaskHolder);
+bindEventsToAllTasks(completedTasksHolder);
 
 // Issues with usability don't get seen until they are in front of a human tester.
 
